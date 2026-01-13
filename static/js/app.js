@@ -383,6 +383,7 @@ function loadConfigToModal() {
     document.getElementById('okxPassphrase').value = currentConfig.okx_passphrase;
     document.getElementById('useTestnet').checked = currentConfig.use_testnet;
     document.getElementById('symbol').value = currentConfig.symbol;
+    document.getElementById('leverage').value = currentConfig.leverage;
     document.getElementById('shortSafetyLinePrice').value = currentConfig.short_safety_line_price;
     document.getElementById('longSafetyLinePrice').value = currentConfig.long_safety_line_price;
     document.getElementById('hedgeMode').checked = currentConfig.hedge_mode;
@@ -392,7 +393,6 @@ function loadConfigToModal() {
     document.getElementById('shortAutoSlOffset').value = currentConfig.short_auto_sl_offset;
     document.getElementById('longAutoSlTriggerPrice').value = currentConfig.long_auto_sl_trigger_price;
     document.getElementById('longAutoSlOffset').value = currentConfig.long_auto_sl_offset;
-    document.getElementById('leverage').value = currentConfig.leverage;
     document.getElementById('maxAllowedUsed').value = currentConfig.max_allowed_used;
     document.getElementById('entryPriceOffset').value = currentConfig.entry_price_offset;
     document.getElementById('batchOffset').value = currentConfig.batch_offset;
@@ -401,8 +401,14 @@ function loadConfigToModal() {
     document.getElementById('loopTimeSeconds').value = currentConfig.loop_time_seconds;
     document.getElementById('rateDivisor').value = currentConfig.rate_divisor;
     document.getElementById('batchSizePerLoop').value = currentConfig.batch_size_per_loop;
-    document.getElementById('minOrderAmount').value = currentConfig.min_order_amount;
     document.getElementById('targetOrderAmount').value = currentConfig.target_order_amount;
+    document.getElementById('targetProfitPercentage').value = currentConfig.target_profit_percentage;
+    document.getElementById('baseCurrency').value = currentConfig.base_currency;
+    document.getElementById('quoteCurrency').value = currentConfig.quote_currency;
+    document.getElementById('stopLossPercentage').value = currentConfig.stop_loss_percentage;
+    document.getElementById('trailingStopLossPercentage').value = currentConfig.trailing_stop_loss_percentage;
+    document.getElementById('maxConcurrentOrders').value = currentConfig.max_concurrent_orders;
+    document.getElementById('minOrderAmount').value = currentConfig.min_order_amount;
     document.getElementById('cancelUnfilledSeconds').value = currentConfig.cancel_unfilled_seconds;
     document.getElementById('cancelOnTpPriceBelowMarket').checked = currentConfig.cancel_on_tp_price_below_market;
     document.getElementById('cancelOnEntryPriceBelowMarket').checked = currentConfig.cancel_on_entry_price_below_market;
@@ -415,6 +421,7 @@ async function saveConfig() {
         okx_passphrase: document.getElementById('okxPassphrase').value,
         use_testnet: document.getElementById('useTestnet').checked,
         symbol: document.getElementById('symbol').value,
+        leverage: parseInt(document.getElementById('leverage').value),
         short_safety_line_price: parseFloat(document.getElementById('shortSafetyLinePrice').value),
         long_safety_line_price: parseFloat(document.getElementById('longSafetyLinePrice').value),
         hedge_mode: document.getElementById('hedgeMode').checked,
@@ -424,7 +431,6 @@ async function saveConfig() {
         short_auto_sl_offset: parseFloat(document.getElementById('shortAutoSlOffset').value),
         long_auto_sl_trigger_price: parseFloat(document.getElementById('longAutoSlTriggerPrice').value),
         long_auto_sl_offset: parseFloat(document.getElementById('longAutoSlOffset').value),
-        leverage: parseInt(document.getElementById('leverage').value),
         max_allowed_used: parseFloat(document.getElementById('maxAllowedUsed').value),
         entry_price_offset: parseFloat(document.getElementById('entryPriceOffset').value),
         batch_offset: parseFloat(document.getElementById('batchOffset').value),
@@ -433,8 +439,14 @@ async function saveConfig() {
         loop_time_seconds: parseInt(document.getElementById('loopTimeSeconds').value),
         rate_divisor: parseInt(document.getElementById('rateDivisor').value),
         batch_size_per_loop: parseInt(document.getElementById('batchSizePerLoop').value),
-        min_order_amount: parseFloat(document.getElementById('minOrderAmount').value),
         target_order_amount: parseFloat(document.getElementById('targetOrderAmount').value),
+        target_profit_percentage: parseFloat(document.getElementById('targetProfitPercentage').value),
+        base_currency: document.getElementById('baseCurrency').value,
+        quote_currency: document.getElementById('quoteCurrency').value,
+        stop_loss_percentage: parseFloat(document.getElementById('stopLossPercentage').value),
+        trailing_stop_loss_percentage: parseFloat(document.getElementById('trailingStopLossPercentage').value),
+        max_concurrent_orders: parseInt(document.getElementById('maxConcurrentOrders').value),
+        min_order_amount: parseFloat(document.getElementById('minOrderAmount').value),
         cancel_unfilled_seconds: parseInt(document.getElementById('cancelUnfilledSeconds').value),
         cancel_on_tp_price_below_market: document.getElementById('cancelOnTpPriceBelowMarket').checked,
         cancel_on_entry_price_below_market: document.getElementById('cancelOnEntryPriceBelowMarket').checked,
