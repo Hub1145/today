@@ -1,6 +1,5 @@
 const socket = io();
 
-let isBotRunning = false;
 let currentConfig = null;
 const configModal = new bootstrap.Modal(document.getElementById('configModal'));
 
@@ -196,6 +195,14 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.symbol}</span>
             </div>
             <div class="param-item">
+                <span class="param-label">Direction:</span>
+                <span class="param-value">${currentConfig.direction}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Mode:</span>
+                <span class="param-value">${currentConfig.mode}</span>
+            </div>
+            <div class="param-item">
                 <span class="param-label">Leverage:</span>
                 <span class="param-value">${currentConfig.leverage}x</span>
             </div>
@@ -208,52 +215,40 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.long_safety_line_price}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Hedge Mode:</span>
-                <span class="param-value">${currentConfig.hedge_mode ? 'On' : 'Off'}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Short TP Price:</span>
-                <span class="param-value">${currentConfig.short_tp_price}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Long TP Price:</span>
-                <span class="param-value">${currentConfig.long_tp_price}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Short Auto SL Trigger:</span>
-                <span class="param-value">${currentConfig.short_auto_sl_trigger_price}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Short Auto SL Offset:</span>
-                <span class="param-value">${currentConfig.short_auto_sl_offset}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Long Auto SL Trigger:</span>
-                <span class="param-value">${currentConfig.long_auto_sl_trigger_price}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Long Auto SL Offset:</span>
-                <span class="param-value">${currentConfig.long_auto_sl_offset}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Max Allowed Used:</span>
-                <span class="param-value">${currentConfig.max_allowed_used}</span>
+                <span class="param-label">Target Order Amount:</span>
+                <span class="param-value">${currentConfig.target_order_amount}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Entry Price Offset:</span>
                 <span class="param-value">${currentConfig.entry_price_offset}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Batch Offset:</span>
-                <span class="param-value">${currentConfig.batch_offset}</span>
-            </div>
-            <div class="param-item">
                 <span class="param-label">TP Price Offset:</span>
                 <span class="param-value">${currentConfig.tp_price_offset}</span>
             </div>
             <div class="param-item">
+                <span class="param-label">TP Amount:</span>
+                <span class="param-value">${currentConfig.tp_amount}</span>
+            </div>
+            <div class="param-item">
                 <span class="param-label">SL Price Offset:</span>
                 <span class="param-value">${currentConfig.sl_price_offset}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">SL Amount:</span>
+                <span class="param-value">${currentConfig.sl_amount}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Trigger Price:</span>
+                <span class="param-value">${currentConfig.trigger_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">TP Mode:</span>
+                <span class="param-value">${currentConfig.tp_mode}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">TP Type:</span>
+                <span class="param-value">${currentConfig.tp_type}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Loop Time:</span>
@@ -268,12 +263,12 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.batch_size_per_loop}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Min Order Amount:</span>
-                <span class="param-value">${currentConfig.min_order_amount}</span>
+                <span class="param-label">Batch Offset:</span>
+                <span class="param-value">${currentConfig.batch_offset}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Target Order Amount:</span>
-                <span class="param-value">${currentConfig.target_order_amount}</span>
+                <span class="param-label">Min Order Amount:</span>
+                <span class="param-value">${currentConfig.min_order_amount}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Cancel Unfilled in:</span>
@@ -383,35 +378,29 @@ function loadConfigToModal() {
     document.getElementById('okxPassphrase').value = currentConfig.okx_passphrase;
     document.getElementById('useTestnet').checked = currentConfig.use_testnet;
     document.getElementById('symbol').value = currentConfig.symbol;
-    document.getElementById('leverage').value = currentConfig.leverage;
     document.getElementById('shortSafetyLinePrice').value = currentConfig.short_safety_line_price;
     document.getElementById('longSafetyLinePrice').value = currentConfig.long_safety_line_price;
-    document.getElementById('hedgeMode').checked = currentConfig.hedge_mode;
-    document.getElementById('shortTpPrice').value = currentConfig.short_tp_price;
-    document.getElementById('longTpPrice').value = currentConfig.long_tp_price;
-    document.getElementById('shortAutoSlTriggerPrice').value = currentConfig.short_auto_sl_trigger_price;
-    document.getElementById('shortAutoSlOffset').value = currentConfig.short_auto_sl_offset;
-    document.getElementById('longAutoSlTriggerPrice').value = currentConfig.long_auto_sl_trigger_price;
-    document.getElementById('longAutoSlOffset').value = currentConfig.long_auto_sl_offset;
+    document.getElementById('leverage').value = currentConfig.leverage;
     document.getElementById('maxAllowedUsed').value = currentConfig.max_allowed_used;
     document.getElementById('entryPriceOffset').value = currentConfig.entry_price_offset;
     document.getElementById('batchOffset').value = currentConfig.batch_offset;
-    document.getElementById('tpPriceOffset').value = currentConfig.tp_price_offset;
-    document.getElementById('slPriceOffset').value = currentConfig.sl_price_offset;
     document.getElementById('loopTimeSeconds').value = currentConfig.loop_time_seconds;
     document.getElementById('rateDivisor').value = currentConfig.rate_divisor;
     document.getElementById('batchSizePerLoop').value = currentConfig.batch_size_per_loop;
-    document.getElementById('targetOrderAmount').value = currentConfig.target_order_amount;
-    document.getElementById('targetProfitPercentage').value = currentConfig.target_profit_percentage;
-    document.getElementById('baseCurrency').value = currentConfig.base_currency;
-    document.getElementById('quoteCurrency').value = currentConfig.quote_currency;
-    document.getElementById('stopLossPercentage').value = currentConfig.stop_loss_percentage;
-    document.getElementById('trailingStopLossPercentage').value = currentConfig.trailing_stop_loss_percentage;
-    document.getElementById('maxConcurrentOrders').value = currentConfig.max_concurrent_orders;
     document.getElementById('minOrderAmount').value = currentConfig.min_order_amount;
+    document.getElementById('targetOrderAmount').value = currentConfig.target_order_amount;
     document.getElementById('cancelUnfilledSeconds').value = currentConfig.cancel_unfilled_seconds;
     document.getElementById('cancelOnTpPriceBelowMarket').checked = currentConfig.cancel_on_tp_price_below_market;
     document.getElementById('cancelOnEntryPriceBelowMarket').checked = currentConfig.cancel_on_entry_price_below_market;
+
+    // New fields
+    document.getElementById('direction').value = currentConfig.direction;
+    document.getElementById('mode').value = currentConfig.mode;
+    document.getElementById('tpAmount').value = currentConfig.tp_amount;
+    document.getElementById('slAmount').value = currentConfig.sl_amount;
+    document.getElementById('triggerPrice').value = currentConfig.trigger_price;
+    document.getElementById('tpMode').value = currentConfig.tp_mode;
+    document.getElementById('tpType').value = currentConfig.tp_type;
 }
 
 async function saveConfig() {
@@ -421,35 +410,29 @@ async function saveConfig() {
         okx_passphrase: document.getElementById('okxPassphrase').value,
         use_testnet: document.getElementById('useTestnet').checked,
         symbol: document.getElementById('symbol').value,
-        leverage: parseInt(document.getElementById('leverage').value),
         short_safety_line_price: parseFloat(document.getElementById('shortSafetyLinePrice').value),
         long_safety_line_price: parseFloat(document.getElementById('longSafetyLinePrice').value),
-        hedge_mode: document.getElementById('hedgeMode').checked,
-        short_tp_price: parseFloat(document.getElementById('shortTpPrice').value),
-        long_tp_price: parseFloat(document.getElementById('longTpPrice').value),
-        short_auto_sl_trigger_price: parseFloat(document.getElementById('shortAutoSlTriggerPrice').value),
-        short_auto_sl_offset: parseFloat(document.getElementById('shortAutoSlOffset').value),
-        long_auto_sl_trigger_price: parseFloat(document.getElementById('longAutoSlTriggerPrice').value),
-        long_auto_sl_offset: parseFloat(document.getElementById('longAutoSlOffset').value),
+        leverage: parseInt(document.getElementById('leverage').value),
         max_allowed_used: parseFloat(document.getElementById('maxAllowedUsed').value),
         entry_price_offset: parseFloat(document.getElementById('entryPriceOffset').value),
         batch_offset: parseFloat(document.getElementById('batchOffset').value),
-        tp_price_offset: parseFloat(document.getElementById('tpPriceOffset').value),
-        sl_price_offset: parseFloat(document.getElementById('slPriceOffset').value),
         loop_time_seconds: parseInt(document.getElementById('loopTimeSeconds').value),
         rate_divisor: parseInt(document.getElementById('rateDivisor').value),
         batch_size_per_loop: parseInt(document.getElementById('batchSizePerLoop').value),
-        target_order_amount: parseFloat(document.getElementById('targetOrderAmount').value),
-        target_profit_percentage: parseFloat(document.getElementById('targetProfitPercentage').value),
-        base_currency: document.getElementById('baseCurrency').value,
-        quote_currency: document.getElementById('quoteCurrency').value,
-        stop_loss_percentage: parseFloat(document.getElementById('stopLossPercentage').value),
-        trailing_stop_loss_percentage: parseFloat(document.getElementById('trailingStopLossPercentage').value),
-        max_concurrent_orders: parseInt(document.getElementById('maxConcurrentOrders').value),
         min_order_amount: parseFloat(document.getElementById('minOrderAmount').value),
+        target_order_amount: parseFloat(document.getElementById('targetOrderAmount').value),
         cancel_unfilled_seconds: parseInt(document.getElementById('cancelUnfilledSeconds').value),
         cancel_on_tp_price_below_market: document.getElementById('cancelOnTpPriceBelowMarket').checked,
         cancel_on_entry_price_below_market: document.getElementById('cancelOnEntryPriceBelowMarket').checked,
+
+        // New fields
+        direction: document.getElementById('direction').value,
+        mode: document.getElementById('mode').value,
+        tp_amount: parseFloat(document.getElementById('tpAmount').value),
+        sl_amount: parseFloat(document.getElementById('slAmount').value),
+        trigger_price: document.getElementById('triggerPrice').value,
+        tp_mode: document.getElementById('tpMode').value,
+        tp_type: document.getElementById('tpType').value,
     };
 
     try {

@@ -209,34 +209,6 @@
                                         <label class="form-label">Long Safety Line Price</label>
                                         <input type="number" class="form-control" id="longSafetyLinePrice" step="0.01">
                                     </div>
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" class="form-check-input" id="hedgeMode">
-                                        <label class="form-check-label" for="hedgeMode">Hedge Mode</label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Short TP Price</label>
-                                        <input type="number" class="form-control" id="shortTpPrice" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Long TP Price</label>
-                                        <input type="number" class="form-control" id="longTpPrice" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Short Auto SL Trigger Price</label>
-                                        <input type="number" class="form-control" id="shortAutoSlTriggerPrice" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Short Auto SL Offset</label>
-                                        <input type="number" class="form-control" id="shortAutoSlOffset" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Long Auto SL Trigger Price</label>
-                                        <input type="number" class="form-control" id="longAutoSlTriggerPrice" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Long Auto SL Offset</label>
-                                        <input type="number" class="form-control" id="longAutoSlOffset" step="0.01">
-                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label">Max Allowed Used (USDT)</label>
                                         <input type="number" class="form-control" id="maxAllowedUsed" min="1">
@@ -248,14 +220,6 @@
                                     <div class="mb-3">
                                         <label class="form-label">Batch Offset</label>
                                         <input type="number" class="form-control" id="batchOffset" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">TP Price Offset</label>
-                                        <input type="number" class="form-control" id="tpPriceOffset" step="0.01">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">SL Price Offset</label>
-                                        <input type="number" class="form-control" id="slPriceOffset" step="0.01">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Loop Time (seconds)</label>
@@ -270,32 +234,51 @@
                                         <input type="number" class="form-control" id="batchSizePerLoop" min="1">
                                     </div>
                                     <div class="mb-3">
+                                        <label class="form-label">Direction</label>
+                                        <select class="form-select" id="direction">
+                                            <option value="short">Short</option>
+                                            <option value="long">Long</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Mode</label>
+                                        <select class="form-select" id="mode">
+                                            <option value="cross">Cross</option>
+                                            <option value="isolated">Isolated</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label">Target Order Amount</label>
                                         <input type="number" class="form-control" id="targetOrderAmount" step="0.001" min="0">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Target Profit %</label>
-                                        <input type="number" class="form-control" id="targetProfitPercentage" step="0.01" min="0">
+                                        <label class="form-label">TP Amount</label>
+                                        <input type="number" class="form-control" id="tpAmount" step="0.01" min="0">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Base Currency</label>
-                                        <input type="text" class="form-control" id="baseCurrency">
+                                        <label class="form-label">SL Amount</label>
+                                        <input type="number" class="form-control" id="slAmount" step="0.01" min="0">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Quote Currency</label>
-                                        <input type="text" class="form-control" id="quoteCurrency">
+                                        <label class="form-label">Trigger Price</label>
+                                        <select class="form-select" id="triggerPrice">
+                                            <option value="last">Last</option>
+                                            <option value="market">Market</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Stop-loss %</label>
-                                        <input type="number" class="form-control" id="stopLossPercentage" step="0.01" min="0">
+                                        <label class="form-label">TP Mode</label>
+                                        <select class="form-select" id="tpMode">
+                                            <option value="limit">TP Limit</option>
+                                            <option value="market">TP Market</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Trailing Stop-loss %</label>
-                                        <input type="number" class="form-control" id="trailingStopLossPercentage" step="0.01" min="0">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Max Concurrent Orders</label>
-                                        <input type="number" class="form-control" id="maxConcurrentOrders" min="1">
+                                        <label class="form-label">TP Type</label>
+                                        <select class="form-select" id="tpType">
+                                            <option value="oco">OCO TP/SL</option>
+                                            <option value="split">Split TP/SL</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Min Order Amount</label>

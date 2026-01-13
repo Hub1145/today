@@ -41,7 +41,6 @@ def log_config_on_request():
 def index():
     return render_template('dashboard.html')
 
-
 @app.route('/api/config', methods=['GET'])
 def get_config():
     config = load_config()
@@ -53,15 +52,25 @@ def update_config():
 
     try:
         new_config = request.json
-        if 'active_strategy' in new_config:
-            del new_config['active_strategy']
-        if 'target_order_amount' in new_config: # Remove old parameter if present
-            del new_config['target_order_amount']
+
+        # Whitelist of all valid parameters
+        allowed_params = [
+            'okx_api_key', 'okx_api_secret', 'okx_passphrase', 'use_testnet', 'symbol',
+            'short_safety_line_price', 'long_safety_line_price', 'leverage', 'max_allowed_used',
+            'entry_price_offset', 'batch_offset',
+            'loop_time_seconds', 'rate_divisor', 'batch_size_per_loop', 'min_order_amount',
+            'target_order_amount', 'cancel_unfilled_seconds', 'cancel_on_tp_price_below_market',
+            'cancel_on_entry_price_below_market', 'direction', 'mode', 'tp_amount', 'sl_amount',
+            'trigger_price', 'tp_mode', 'tp_type'
+        ]
+
+        # Filter the new_config to only include allowed parameters
+        filtered_config = {k: v for k, v in new_config.items() if k in allowed_params}
 
         if bot_engine and bot_engine.is_running:
             return jsonify({'success': False, 'message': 'Please stop the bot before updating configuration'}), 400
 
-        save_config(new_config)
+        save_config(filtered_config)
 
         return jsonify({'success': True, 'message': 'Configuration updated successfully'})
 
