@@ -1,5 +1,6 @@
 const socket = io();
 
+let isBotRunning = false;
 let currentConfig = null;
 const configModal = new bootstrap.Modal(document.getElementById('configModal'));
 
@@ -31,14 +32,15 @@ function setupEventListeners() {
         updateThemeIcon(theme);
     });
 
-    document.getElementById('startBtn').addEventListener('click', () => {
-        socket.emit('start_bot');
-        document.getElementById('startBtn').disabled = true;
-    });
+    document.getElementById('startStopBtn').addEventListener('click', () => {
+        const btn = document.getElementById('startStopBtn');
+        btn.disabled = true; // Disable button to prevent double clicks
 
-    document.getElementById('stopBtn').addEventListener('click', () => {
-        socket.emit('stop_bot');
-        document.getElementById('stopBtn').disabled = true;
+        if (isBotRunning) {
+            socket.emit('stop_bot');
+        } else {
+            socket.emit('start_bot');
+        }
     });
 
     document.getElementById('configBtn').addEventListener('click', () => {
@@ -129,21 +131,26 @@ function setupSocketListeners() {
 }
 
 function updateBotStatus(running) {
+    isBotRunning = running;
     const statusBadge = document.getElementById('botStatus');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const btnIcon = startStopBtn.querySelector('i');
+    const btnText = startStopBtn.querySelector('span');
 
     if (running) {
         statusBadge.textContent = 'Running';
         statusBadge.className = 'badge status-badge running';
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
+        startStopBtn.className = 'btn btn-danger';
+        btnIcon.className = 'bi bi-stop-fill';
+        btnText.textContent = 'Stop';
     } else {
         statusBadge.textContent = 'Stopped';
         statusBadge.className = 'badge status-badge stopped';
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
+        startStopBtn.className = 'btn btn-success';
+        btnIcon.className = 'bi bi-play-fill';
+        btnText.textContent = 'Start';
     }
+    startStopBtn.disabled = false; // Re-enable the button
 }
 
 
@@ -199,6 +206,34 @@ function updateParametersDisplay() {
             <div class="param-item">
                 <span class="param-label">Long Safety Line:</span>
                 <span class="param-value">${currentConfig.long_safety_line_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Hedge Mode:</span>
+                <span class="param-value">${currentConfig.hedge_mode ? 'On' : 'Off'}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Short TP Price:</span>
+                <span class="param-value">${currentConfig.short_tp_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Long TP Price:</span>
+                <span class="param-value">${currentConfig.long_tp_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Short Auto SL Trigger:</span>
+                <span class="param-value">${currentConfig.short_auto_sl_trigger_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Short Auto SL Offset:</span>
+                <span class="param-value">${currentConfig.short_auto_sl_offset}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Long Auto SL Trigger:</span>
+                <span class="param-value">${currentConfig.long_auto_sl_trigger_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Long Auto SL Offset:</span>
+                <span class="param-value">${currentConfig.long_auto_sl_offset}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Max Allowed Used:</span>
@@ -350,6 +385,13 @@ function loadConfigToModal() {
     document.getElementById('symbol').value = currentConfig.symbol;
     document.getElementById('shortSafetyLinePrice').value = currentConfig.short_safety_line_price;
     document.getElementById('longSafetyLinePrice').value = currentConfig.long_safety_line_price;
+    document.getElementById('hedgeMode').checked = currentConfig.hedge_mode;
+    document.getElementById('shortTpPrice').value = currentConfig.short_tp_price;
+    document.getElementById('longTpPrice').value = currentConfig.long_tp_price;
+    document.getElementById('shortAutoSlTriggerPrice').value = currentConfig.short_auto_sl_trigger_price;
+    document.getElementById('shortAutoSlOffset').value = currentConfig.short_auto_sl_offset;
+    document.getElementById('longAutoSlTriggerPrice').value = currentConfig.long_auto_sl_trigger_price;
+    document.getElementById('longAutoSlOffset').value = currentConfig.long_auto_sl_offset;
     document.getElementById('leverage').value = currentConfig.leverage;
     document.getElementById('maxAllowedUsed').value = currentConfig.max_allowed_used;
     document.getElementById('entryPriceOffset').value = currentConfig.entry_price_offset;
@@ -375,6 +417,13 @@ async function saveConfig() {
         symbol: document.getElementById('symbol').value,
         short_safety_line_price: parseFloat(document.getElementById('shortSafetyLinePrice').value),
         long_safety_line_price: parseFloat(document.getElementById('longSafetyLinePrice').value),
+        hedge_mode: document.getElementById('hedgeMode').checked,
+        short_tp_price: parseFloat(document.getElementById('shortTpPrice').value),
+        long_tp_price: parseFloat(document.getElementById('longTpPrice').value),
+        short_auto_sl_trigger_price: parseFloat(document.getElementById('shortAutoSlTriggerPrice').value),
+        short_auto_sl_offset: parseFloat(document.getElementById('shortAutoSlOffset').value),
+        long_auto_sl_trigger_price: parseFloat(document.getElementById('longAutoSlTriggerPrice').value),
+        long_auto_sl_offset: parseFloat(document.getElementById('longAutoSlOffset').value),
         leverage: parseInt(document.getElementById('leverage').value),
         max_allowed_used: parseFloat(document.getElementById('maxAllowedUsed').value),
         entry_price_offset: parseFloat(document.getElementById('entryPriceOffset').value),

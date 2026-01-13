@@ -471,7 +471,15 @@ class TradingBotEngine:
                 config.setdefault('max_allowed_used', 1000.0)
                 config.setdefault('cancel_on_tp_price_below_market', True)
                 config.setdefault('cancel_on_entry_price_below_market', True)
-                config.setdefault('websocket_timeframes', ['1m', '5m']) # Add default for websocket_timeframes
+                config.setdefault('websocket_timeframes', ['1m', '5m'])
+                config.setdefault('hedge_mode', True)
+                config.setdefault('short_tp_price', 0)
+                config.setdefault('long_tp_price', 0)
+                config.setdefault('short_auto_sl_trigger_price', 0)
+                config.setdefault('short_auto_sl_offset', 0)
+                config.setdefault('long_auto_sl_trigger_price', 0)
+                config.setdefault('long_auto_sl_offset', 0)
+                config.setdefault('target_order_amount', 1000)
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')
@@ -952,7 +960,7 @@ class TradingBotEngine:
 
     def _okx_place_order(self, symbol, side, qty, price=None, order_type="Market",
                         time_in_force=None, reduce_only=False,
-                        stop_loss_price=None, take_profit_price=None):
+                        stop_loss_price=None, take_profit_price=None, posSide=None):
         try:
             path = "/api/v5/trade/order"
             price_precision = PRODUCT_INFO.get('pricePrecision', 4)
@@ -967,6 +975,9 @@ class TradingBotEngine:
                 "ordType": order_type.lower(),
                 "sz": order_qty_str,
             }
+
+            if self.config['hedge_mode'] and posSide:
+                body["posSide"] = posSide
 
             if order_type.lower() == "limit" and price is not None:
                 body["px"] = f"{price:.{price_precision}f}"
@@ -1437,10 +1448,10 @@ class TradingBotEngine:
             signal_direction = self.pending_entry_order_details.get('signal')
 
             if signal_direction == 1: # Long position
-                tp_price = actual_entry_price + tp_price_offset
+                tp_price = self.config['long_tp_price']
                 sl_price = actual_entry_price - sl_price_offset
             else: # Short position (signal_direction == -1)
-                tp_price = actual_entry_price - tp_price_offset
+                tp_price = self.config['short_tp_price']
                 sl_price = actual_entry_price + sl_price_offset
             
             with self.position_lock:
@@ -1747,7 +1758,8 @@ class TradingBotEngine:
                 qty_base_asset,
                 price=current_limit_price,
                 order_type="Limit",
-                time_in_force="GoodTillCancel"
+                time_in_force="GoodTillCancel",
+                posSide="long" if signal == 1 else "short"
             )
 
             if entry_order_response and entry_order_response.get('ordId'):
@@ -1838,9 +1850,61 @@ class TradingBotEngine:
                     self.log("Position manager exiting (no active position/order)", level="info")
                     break
 
+                if is_in_pos:
+                    signal_direction = pending_order_details.get('signal', 1 if self.position_entry_price > self.current_stop_loss else -1) # Infer from position if details are lost
+                    if signal_direction == 1: # Long position
+                        if self.config['long_auto_sl_trigger_price'] > 0 and current_market_price >= self.config['long_auto_sl_trigger_price']:
+                            new_sl_price = current_market_price - self.config['long_auto_sl_offset']
+                            if new_sl_price > self.current_stop_loss: # Only move SL up for longs
+                                self.log(f"Long auto SL triggered at {current_market_price}. New SL price: {new_sl_price}", level="info")
+                                self._update_stop_loss(new_sl_price)
+                    elif signal_direction == -1: # Short position
+                        if self.config['short_auto_sl_trigger_price'] > 0 and current_market_price <= self.config['short_auto_sl_trigger_price']:
+                            new_sl_price = current_market_price + self.config['short_auto_sl_offset']
+                            if new_sl_price < self.current_stop_loss: # Only move SL down for shorts
+                                self.log(f"Short auto SL triggered at {current_market_price}. New SL price: {new_sl_price}", level="info")
+                                self._update_stop_loss(new_sl_price)
+
+
             self.log("Position manager thread finished", level="info")
         except Exception as e:
             self.log(f"Exception in _manage_position_lifecycle: {e}", level="error")
+
+    def _update_stop_loss(self, new_sl_price):
+        with self.position_lock:
+            if not self.in_position:
+                return
+
+            old_sl_order_id = self.position_exit_orders.get('sl')
+            if old_sl_order_id:
+                self._okx_cancel_algo_order(self.config['symbol'], old_sl_order_id)
+
+            signal_direction = 1 if self.position_entry_price > self.current_stop_loss else -1
+            pos_side = "long" if signal_direction == 1 else "short"
+
+            price_precision = PRODUCT_INFO.get('pricePrecision', 4)
+            qty_precision = PRODUCT_INFO.get('qtyPrecision', 8)
+
+            sl_body = {
+                "instId": self.config['symbol'],
+                "tdMode": "cross",
+                "side": "sell" if pos_side == 'long' else "buy",
+                "posSide": pos_side,
+                "ordType": "conditional",
+                "sz": f"{self.position_qty:.{qty_precision}f}",
+                "slTriggerPx": f"{new_sl_price:.{price_precision}f}",
+                "slOrdPx": "market",
+                "reduceOnly": "true"
+            }
+
+            sl_order = self._okx_place_algo_order(sl_body)
+            if sl_order and (sl_order.get('algoId') or sl_order.get('ordId')):
+                self.position_exit_orders['sl'] = sl_order.get('algoId') or sl_order.get('ordId')
+                self.current_stop_loss = new_sl_price
+                self.log(f"✓ New SL algo order placed at {new_sl_price}", level="info")
+            else:
+                self.log(f"CRITICAL: Failed to update SL order! Original SL may be cancelled.", level="error")
+
 
     def _process_new_cycle_and_check_entry(self):
         try:

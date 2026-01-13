@@ -21,11 +21,8 @@
                         <i class="bi bi-moon-stars" id="themeIcon"></i>
                     </label>
                 </div>
-                <button class="btn btn-success" id="startBtn">
-                    <i class="bi bi-play-fill"></i> Start
-                </button>
-                <button class="btn btn-danger" id="stopBtn" disabled>
-                    <i class="bi bi-stop-fill"></i> Stop
+                <button class="btn btn-primary" id="startStopBtn">
+                    <i class="bi bi-play-fill"></i> <span>Start</span>
                 </button>
                 <button class="btn btn-secondary" id="configBtn">
                     <i class="bi bi-gear-fill"></i> Config
@@ -77,14 +74,14 @@
                             <div class="card-header"><h5 class="mb-0"><i class="bi bi-cash-stack"></i> Financials</h5></div>
                             <div class="card-body">
                                 <div class="row g-3">
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Capital</div><div class="stat-value" id="totalCapital">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Max Allowed Used</div><div class="stat-value" id="maxAllowedUsedDisplay">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Max Amount</div><div class="stat-value" id="maxAmountDisplay">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Used Amount</div><div class="stat-value" id="usedAmount">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Remaining Amount</div><div class="stat-value" id="remainingAmount">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value" id="balance">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="totalTrades">0</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Total Capital</div><div class="stat-value" id="totalCapital">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Max Allowed Used</div><div class="stat-value" id="maxAllowedUsedDisplay">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Max Amount</div><div class="stat-value" id="maxAmountDisplay">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Used Amount</div><div class="stat-value" id="usedAmount">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Remaining Amount</div><div class="stat-value" id="remainingAmount">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value" id="balance">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="totalTrades">0</div></div></div>
                                 </div>
                             </div>
                         </div>
@@ -212,6 +209,34 @@
                                         <label class="form-label">Long Safety Line Price</label>
                                         <input type="number" class="form-control" id="longSafetyLinePrice" step="0.01">
                                     </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="hedgeMode">
+                                        <label class="form-check-label" for="hedgeMode">Hedge Mode</label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Short TP Price</label>
+                                        <input type="number" class="form-control" id="shortTpPrice" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Long TP Price</label>
+                                        <input type="number" class="form-control" id="longTpPrice" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Short Auto SL Trigger Price</label>
+                                        <input type="number" class="form-control" id="shortAutoSlTriggerPrice" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Short Auto SL Offset</label>
+                                        <input type="number" class="form-control" id="shortAutoSlOffset" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Long Auto SL Trigger Price</label>
+                                        <input type="number" class="form-control" id="longAutoSlTriggerPrice" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Long Auto SL Offset</label>
+                                        <input type="number" class="form-control" id="longAutoSlOffset" step="0.01">
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label">Max Allowed Used (USDT)</label>
                                         <input type="number" class="form-control" id="maxAllowedUsed" min="1">
@@ -251,10 +276,6 @@
                                     <div class="mb-3">
                                         <label class="form-label">Min Order Amount</label>
                                         <input type="number" class="form-control" id="minOrderAmount" step="0.001">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Target Order Amount</label>
-                                        <input type="number" class="form-control" id="targetOrderAmount" step="0.001" min="0">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Cancel Unfilled Order (seconds)</label>
