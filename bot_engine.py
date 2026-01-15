@@ -1446,18 +1446,18 @@ class TradingBotEngine:
 
             reduced_tp = self.entry_reduced_tp_flag if hasattr(self, 'entry_reduced_tp_flag') else False
 
-            tp_amount_percent = self.config.get('tp_amount', 0.5)
-            sl_amount_percent = self.config.get('sl_amount', 1.0)
+            tp_price_offset = self.config.get('tp_price_offset', 0.6)
+            sl_price_offset = self.config.get('sl_price_offset', 30)
 
             # Assuming long position for now based on strategy
             signal_direction = self.pending_entry_order_details.get('signal')
 
             if signal_direction == 1: # Long position
-                tp_price = actual_entry_price * (1 + (tp_amount_percent / 100))
-                sl_price = actual_entry_price * (1 - (sl_amount_percent / 100))
+                tp_price = actual_entry_price + tp_price_offset
+                sl_price = actual_entry_price - sl_price_offset
             else: # Short position (signal_direction == -1)
-                tp_price = actual_entry_price * (1 - (tp_amount_percent / 100))
-                sl_price = actual_entry_price * (1 + (sl_amount_percent / 100))
+                tp_price = actual_entry_price - tp_price_offset
+                sl_price = actual_entry_price + sl_price_offset
             
             with self.position_lock:
                 self.in_position = True
@@ -1484,7 +1484,7 @@ class TradingBotEngine:
                 "side": "sell",
                 "posSide": "long",
                 "ordType": "conditional",
-                "sz": f"{actual_qty:.{qty_precision}f}",
+                "sz": f"{(actual_qty * (self.config.get('tp_amount', 100) / 100)):.{qty_precision}f}",
                 "tpTriggerPx": f"{tp_price:.{price_precision}f}",
                 "tpOrdPx": "market",
                 "reduceOnly": "true"
@@ -1506,7 +1506,7 @@ class TradingBotEngine:
                 "side": "sell",
                 "posSide": "long",
                 "ordType": "conditional",
-                "sz": f"{actual_qty:.{qty_precision}f}",
+                "sz": f"{(actual_qty * (self.config.get('sl_amount', 100) / 100)):.{qty_precision}f}",
                 "slTriggerPx": f"{sl_price:.{price_precision}f}",
                 "slOrdPx": "market",
                 "reduceOnly": "true"

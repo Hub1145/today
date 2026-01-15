@@ -384,6 +384,8 @@ function loadConfigToModal() {
     document.getElementById('maxAllowedUsed').value = currentConfig.max_allowed_used;
     document.getElementById('entryPriceOffset').value = currentConfig.entry_price_offset;
     document.getElementById('batchOffset').value = currentConfig.batch_offset;
+    document.getElementById('tpPriceOffset').value = currentConfig.tp_price_offset;
+    document.getElementById('slPriceOffset').value = currentConfig.sl_price_offset;
     document.getElementById('loopTimeSeconds').value = currentConfig.loop_time_seconds;
     document.getElementById('rateDivisor').value = currentConfig.rate_divisor;
     document.getElementById('batchSizePerLoop').value = currentConfig.batch_size_per_loop;
@@ -424,6 +426,8 @@ async function saveConfig() {
         max_allowed_used: parseFloat(document.getElementById('maxAllowedUsed').value),
         entry_price_offset: parseFloat(document.getElementById('entryPriceOffset').value),
         batch_offset: parseFloat(document.getElementById('batchOffset').value),
+        tp_price_offset: parseFloat(document.getElementById('tpPriceOffset').value),
+        sl_price_offset: parseFloat(document.getElementById('slPriceOffset').value),
         loop_time_seconds: parseInt(document.getElementById('loopTimeSeconds').value),
         rate_divisor: parseInt(document.getElementById('rateDivisor').value),
         batch_size_per_loop: parseInt(document.getElementById('batchSizePerLoop').value),

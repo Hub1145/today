@@ -57,7 +57,7 @@ def update_config():
         allowed_params = [
             'okx_api_key', 'okx_api_secret', 'okx_passphrase', 'use_testnet', 'symbol',
             'short_safety_line_price', 'long_safety_line_price', 'leverage', 'max_allowed_used',
-            'entry_price_offset', 'batch_offset',
+            'entry_price_offset', 'batch_offset', 'tp_price_offset', 'sl_price_offset',
             'loop_time_seconds', 'rate_divisor', 'batch_size_per_loop', 'min_order_amount',
             'target_order_amount', 'cancel_unfilled_seconds', 'cancel_on_tp_price_below_market',
             'cancel_on_entry_price_below_market', 'direction', 'mode', 'tp_amount', 'sl_amount',
