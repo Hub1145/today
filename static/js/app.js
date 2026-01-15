@@ -407,6 +407,16 @@ function loadConfigToModal() {
     document.getElementById('tpMode').value = currentConfig.tp_mode;
     document.getElementById('tpType').value = currentConfig.tp_type;
 
+    // Candlestick conditions
+    document.getElementById('useChgOpenClose').checked = currentConfig.use_chg_open_close;
+    document.getElementById('minChgOpenClose').value = currentConfig.min_chg_open_close;
+    document.getElementById('maxChgOpenClose').value = currentConfig.max_chg_open_close;
+    document.getElementById('useChgHighLow').checked = currentConfig.use_chg_high_low;
+    document.getElementById('minChgHighLow').value = currentConfig.min_chg_high_low;
+    document.getElementById('maxChgHighLow').value = currentConfig.max_chg_high_low;
+    document.getElementById('useChgHighClose').checked = currentConfig.use_chg_high_close;
+    document.getElementById('minChgHighClose').value = currentConfig.min_chg_high_close;
+    document.getElementById('maxChgHighClose').value = currentConfig.max_chg_high_close;
 }
 
 async function saveConfig() {
@@ -445,6 +455,16 @@ async function saveConfig() {
         tp_mode: document.getElementById('tpMode').value,
         tp_type: document.getElementById('tpType').value,
 
+        // Candlestick conditions
+        use_chg_open_close: document.getElementById('useChgOpenClose').checked,
+        min_chg_open_close: parseFloat(document.getElementById('minChgOpenClose').value),
+        max_chg_open_close: parseFloat(document.getElementById('maxChgOpenClose').value),
+        use_chg_high_low: document.getElementById('useChgHighLow').checked,
+        min_chg_high_low: parseFloat(document.getElementById('minChgHighLow').value),
+        max_chg_high_low: parseFloat(document.getElementById('maxChgHighLow').value),
+        use_chg_high_close: document.getElementById('useChgHighClose').checked,
+        min_chg_high_close: parseFloat(document.getElementById('minChgHighClose').value),
+        max_chg_high_close: parseFloat(document.getElementById('maxChgHighClose').value),
     };
 
     try {

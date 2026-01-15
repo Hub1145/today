@@ -314,6 +314,56 @@
                         </div>
                         <div class="accordion-item">
                             <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#candlestickConditions">
+                                    Candlestick Entry Conditions
+                                </button>
+                            </h2>
+                            <div id="candlestickConditions" class="accordion-collapse collapse" data-bs-parent="#configAccordion">
+                                <div class="accordion-body">
+                                    <!-- Chg between Open and Close -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgOpenClose">
+                                            <label class="form-check-label" for="useChgOpenClose">Chg between Open and Close</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgOpenClose" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgOpenClose" step="0.01">
+                                        </div>
+                                    </div>
+                                    <!-- Chg between High and Low -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgHighLow">
+                                            <label class="form-check-label" for="useChgHighLow">Chg between High and Low</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgHighLow" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgHighLow" step="0.01">
+                                        </div>
+                                    </div>
+                                    <!-- Chg between High and Close -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgHighClose">
+                                            <label class="form-check-label" for="useChgHighClose">Chg between High and Close</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgHighClose" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgHighClose" step="0.01">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cancelConditions">
                                     Cancel Conditions
                                 </button>

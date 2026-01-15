@@ -485,6 +485,15 @@ class TradingBotEngine:
                 config.setdefault('okx_demo_api_key', '')
                 config.setdefault('okx_demo_api_secret', '')
                 config.setdefault('okx_demo_api_passphrase', '')
+                config.setdefault('use_chg_open_close', False)
+                config.setdefault('min_chg_open_close', 0)
+                config.setdefault('max_chg_open_close', 0)
+                config.setdefault('use_chg_high_low', False)
+                config.setdefault('min_chg_high_low', 0)
+                config.setdefault('max_chg_high_low', 0)
+                config.setdefault('use_chg_high_close', False)
+                config.setdefault('min_chg_high_close', 0)
+                config.setdefault('max_chg_high_close', 0)
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')
@@ -1669,6 +1678,52 @@ class TradingBotEngine:
             self.log(f"Exception in _get_latest_data_and_indicators: {e}", level="error")
             return None
 
+    def _check_candlestick_conditions(self, market_data):
+        # Fetch the latest completed candle for the primary timeframe (e.g., '1m')
+        # This assumes you have historical data being updated.
+        primary_timeframe = '1m' # Or configurable
+        with self.data_lock:
+            df = self.historical_data_store.get(primary_timeframe)
+            if df is None or df.empty:
+                self.log(f"No historical data for {primary_timeframe} to check candlestick conditions.", "warning")
+                return True # Default to true if data is not available to not block trades
+
+            latest_candle = df.iloc[-1]
+            o = latest_candle['Open']
+            h = latest_candle['High']
+            l = latest_candle['Low']
+            c = latest_candle['Close']
+
+        # Check Open-Close Change
+        if self.config.get('use_chg_open_close'):
+            chg_open_close = abs(o - c)
+            min_chg = self.config.get('min_chg_open_close', 0)
+            max_chg = self.config.get('max_chg_open_close', 0)
+            if not (min_chg <= chg_open_close <= max_chg):
+                self.log(f"Candlestick Fail: Open-Close change ({chg_open_close:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        # Check High-Low Change
+        if self.config.get('use_chg_high_low'):
+            chg_high_low = h - l
+            min_chg = self.config.get('min_chg_high_low', 0)
+            max_chg = self.config.get('max_chg_high_low', 0)
+            if not (min_chg <= chg_high_low <= max_chg):
+                self.log(f"Candlestick Fail: High-Low change ({chg_high_low:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        # Check High-Close Change
+        if self.config.get('use_chg_high_close'):
+            chg_high_close = abs(h - c)
+            min_chg = self.config.get('min_chg_high_close', 0)
+            max_chg = self.config.get('max_chg_high_close', 0)
+            if not (min_chg <= chg_high_close <= max_chg):
+                self.log(f"Candlestick Fail: High-Close change ({chg_high_close:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        self.log("Candlestick conditions PASSED.", "info")
+        return True
+
     def _check_entry_conditions(self, market_data):
         with self.position_lock:
             if self.in_position:
@@ -1693,6 +1748,10 @@ class TradingBotEngine:
         
         if signal == 0:
             self.log(f"No entry signal: Current price {current_price:.2f} not past safety lines for {direction} direction.", level="info")
+            return False, 0.0, None
+
+        # Check candlestick conditions if safety line condition is met
+        if not self._check_candlestick_conditions(market_data):
             return False, 0.0, None
 
         entry_price_offset = self.config['entry_price_offset']
