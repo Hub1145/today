@@ -38,5 +38,6 @@
   "max_chg_high_low": 0,
   "use_chg_high_close": false,
   "min_chg_high_close": 0,
-  "max_chg_high_close": 0
+  "max_chg_high_close": 0,
+  "candlestick_timeframe": "1m"
 }

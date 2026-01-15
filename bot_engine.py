@@ -494,6 +494,7 @@ class TradingBotEngine:
                 config.setdefault('use_chg_high_close', False)
                 config.setdefault('min_chg_high_close', 0)
                 config.setdefault('max_chg_high_close', 0)
+                config.setdefault('candlestick_timeframe', '1m')
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')
@@ -1681,11 +1682,11 @@ class TradingBotEngine:
     def _check_candlestick_conditions(self, market_data):
         # Fetch the latest completed candle for the primary timeframe (e.g., '1m')
         # This assumes you have historical data being updated.
-        primary_timeframe = '1m' # Or configurable
+        timeframe = self.config.get('candlestick_timeframe', '1m')
         with self.data_lock:
-            df = self.historical_data_store.get(primary_timeframe)
+            df = self.historical_data_store.get(timeframe)
             if df is None or df.empty:
-                self.log(f"No historical data for {primary_timeframe} to check candlestick conditions.", "warning")
+                self.log(f"No historical data for {timeframe} to check candlestick conditions.", "warning")
                 return True # Default to true if data is not available to not block trades
 
             latest_candle = df.iloc[-1]
@@ -1996,6 +1997,12 @@ class TradingBotEngine:
             if not self.ws_subscriptions_ready.wait(timeout=20): # Longer timeout for subscriptions
                 self.log("WebSocket subscriptions not ready within timeout. Exiting.", level="error")
                 return
+
+            # Fetch historical data for the selected timeframe
+            timeframe = self.config.get('candlestick_timeframe', '1m')
+            end_date = datetime.now(timezone.utc)
+            start_date = end_date - timedelta(days=2) # Fetch 2 days of data
+            self._fetch_initial_historical_data(self.config['symbol'], timeframe, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
 
             # Initial account information is no longer updated in real-time via private WebSocket.
             # The bot will not track account balance or available equity in real-time.

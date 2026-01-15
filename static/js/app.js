@@ -417,6 +417,7 @@ function loadConfigToModal() {
     document.getElementById('useChgHighClose').checked = currentConfig.use_chg_high_close;
     document.getElementById('minChgHighClose').value = currentConfig.min_chg_high_close;
     document.getElementById('maxChgHighClose').value = currentConfig.max_chg_high_close;
+    document.getElementById('candlestickTimeframe').value = currentConfig.candlestick_timeframe;
 }
 
 async function saveConfig() {
@@ -465,6 +466,7 @@ async function saveConfig() {
         use_chg_high_close: document.getElementById('useChgHighClose').checked,
         min_chg_high_close: parseFloat(document.getElementById('minChgHighClose').value),
         max_chg_high_close: parseFloat(document.getElementById('maxChgHighClose').value),
+        candlestick_timeframe: document.getElementById('candlestickTimeframe').value,
     };
 
     try {

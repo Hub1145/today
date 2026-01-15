@@ -63,7 +63,7 @@ def update_config():
             'cancel_on_entry_price_below_market', 'direction', 'mode', 'tp_amount', 'sl_amount',
             'trigger_price', 'tp_mode', 'tp_type', 'use_chg_open_close', 'min_chg_open_close',
             'max_chg_open_close', 'use_chg_high_low', 'min_chg_high_low', 'max_chg_high_low',
-            'use_chg_high_close', 'min_chg_high_close', 'max_chg_high_close'
+            'use_chg_high_close', 'min_chg_high_close', 'max_chg_high_close', 'candlestick_timeframe'
         ]
 
         # Filter the new_config to only include allowed parameters
