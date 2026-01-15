@@ -26,11 +26,5 @@
   "sl_amount": 100,
   "trigger_price": "last",
   "tp_mode": "limit",
-  "tp_type": "oco",
-  "entry_interval": "15m",
-  "min_chg": 4,
-  "max_chg": 6,
-  "check_open_close": true,
-  "check_high_low": false,
-  "check_high_close": false
+  "tp_type": "oco"
 }

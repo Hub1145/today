@@ -479,12 +479,6 @@ class TradingBotEngine:
                 config.setdefault('trigger_price', 'last')
                 config.setdefault('tp_mode', 'limit')
                 config.setdefault('tp_type', 'oco')
-                config.setdefault('entry_interval', '15m')
-                config.setdefault('min_chg', 4)
-                config.setdefault('max_chg', 6)
-                config.setdefault('check_open_close', True)
-                config.setdefault('check_high_low', False)
-                config.setdefault('check_high_close', False)
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')
@@ -1695,42 +1689,6 @@ class TradingBotEngine:
             self.log(f"No entry signal: Current price {current_price:.2f} not past safety lines for {direction} direction.", level="info")
             return False, 0.0, None
 
-        # Candlestick entry conditions
-        interval = self.config.get('entry_interval', '15m')
-        min_chg = self.config.get('min_chg', 4)
-        max_chg = self.config.get('max_chg', 6)
-        check_open_close = self.config.get('check_open_close', True)
-        check_high_low = self.config.get('check_high_low', False)
-        check_high_close = self.config.get('check_high_close', False)
-
-        end_ts_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
-        start_ts_ms = end_ts_ms - (self.intervals[interval] * 1000)
-
-        candles = self._fetch_historical_data_okx(self.config['symbol'], interval, start_ts_ms, end_ts_ms)
-
-        if not candles:
-            self.log(f"No candlestick data found for interval {interval}.", level="warning")
-            return False, 0.0, None
-
-        last_candle = candles[-1]
-        o, h, l, c = last_candle[1], last_candle[2], last_candle[3], last_candle[4]
-
-        chg_open_close = abs(o - c)
-        chg_high_low = abs(h - l)
-        chg_high_close = abs(h - c)
-
-        conditions_met = []
-        if check_open_close:
-            conditions_met.append(min_chg <= chg_open_close <= max_chg)
-        if check_high_low:
-            conditions_met.append(min_chg <= chg_high_low <= max_chg)
-        if check_high_close:
-            conditions_met.append(min_chg <= chg_high_close <= max_chg)
-
-        if not all(conditions_met):
-            self.log(f"Candlestick conditions not met for interval {interval}.", level="info")
-            return False, 0.0, None
-
         entry_price_offset = self.config['entry_price_offset']
         if signal == 1: # Long
             limit_price = current_price - entry_price_offset # Buy at a slightly lower price
@@ -1929,18 +1887,11 @@ class TradingBotEngine:
     def _main_trading_logic(self):
         try:
             self.log("=== MAIN TRADING LOGIC STARTED ===", level="info")
-
-            last_check_time = 0
+            loop_time_seconds = self.config['loop_time_seconds']
 
             while not self.stop_event.is_set():
-                interval_seconds = self.intervals[self.config.get('entry_interval', '15m')]
-                now = time.time()
-
-                if now - last_check_time >= interval_seconds:
-                    self._process_new_cycle_and_check_entry()
-                    last_check_time = now
-
-                time.sleep(1)
+                self._process_new_cycle_and_check_entry()
+                time.sleep(loop_time_seconds)
 
         except Exception as e:
             self.log(f"CRITICAL ERROR in _main_trading_logic: {e}", level="error")

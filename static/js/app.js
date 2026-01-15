@@ -404,13 +404,6 @@ function loadConfigToModal() {
     document.getElementById('tpMode').value = currentConfig.tp_mode;
     document.getElementById('tpType').value = currentConfig.tp_type;
 
-    // Candlestick entry conditions
-    document.getElementById('entryInterval').value = currentConfig.entry_interval;
-    document.getElementById('minChg').value = currentConfig.min_chg;
-    document.getElementById('maxChg').value = currentConfig.max_chg;
-    document.getElementById('checkOpenClose').checked = currentConfig.check_open_close;
-    document.getElementById('checkHighLow').checked = currentConfig.check_high_low;
-    document.getElementById('checkHighClose').checked = currentConfig.check_high_close;
 }
 
 async function saveConfig() {
@@ -446,13 +439,6 @@ async function saveConfig() {
         tp_mode: document.getElementById('tpMode').value,
         tp_type: document.getElementById('tpType').value,
 
-        // Candlestick entry conditions
-        entry_interval: document.getElementById('entryInterval').value,
-        min_chg: parseFloat(document.getElementById('minChg').value),
-        max_chg: parseFloat(document.getElementById('maxChg').value),
-        check_open_close: document.getElementById('checkOpenClose').checked,
-        check_high_low: document.getElementById('checkHighLow').checked,
-        check_high_close: document.getElementById('checkHighClose').checked,
     };
 
     try {

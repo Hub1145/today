@@ -61,8 +61,7 @@ def update_config():
             'loop_time_seconds', 'rate_divisor', 'batch_size_per_loop', 'min_order_amount',
             'target_order_amount', 'cancel_unfilled_seconds', 'cancel_on_tp_price_below_market',
             'cancel_on_entry_price_below_market', 'direction', 'mode', 'tp_amount', 'sl_amount',
-            'trigger_price', 'tp_mode', 'tp_type', 'entry_interval', 'min_chg', 'max_chg',
-            'check_open_close', 'check_high_low', 'check_high_close'
+            'trigger_price', 'tp_mode', 'tp_type'
         ]
 
         # Filter the new_config to only include allowed parameters
