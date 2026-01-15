@@ -337,12 +337,15 @@ class TradingBotEngine:
 
         # Initialize OKX API credentials globally
         global okx_api_key, okx_api_secret, okx_passphrase, okx_simulated_trading_header
-        okx_api_key = self.config['okx_api_key']
-        okx_api_secret = self.config['okx_api_secret']
-        okx_passphrase = self.config['okx_passphrase']
         if self.config['use_testnet']:
+            okx_api_key = self.config['okx_demo_api_key']
+            okx_api_secret = self.config['okx_demo_api_secret']
+            okx_passphrase = self.config['okx_demo_api_passphrase']
             okx_simulated_trading_header = {'x-simulated-trading': '1'}
         else:
+            okx_api_key = self.config['okx_api_key']
+            okx_api_secret = self.config['okx_api_secret']
+            okx_passphrase = self.config['okx_passphrase']
             okx_simulated_trading_header = {}
 
         self.ws = None
@@ -479,6 +482,9 @@ class TradingBotEngine:
                 config.setdefault('trigger_price', 'last')
                 config.setdefault('tp_mode', 'limit')
                 config.setdefault('tp_type', 'oco')
+                config.setdefault('okx_demo_api_key', '')
+                config.setdefault('okx_demo_api_secret', '')
+                config.setdefault('okx_demo_api_passphrase', '')
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')

@@ -1,7 +1,10 @@
 {
-  "okx_api_key": "2b38b2de-2369-4898-9c03-c5b34a86c963",
-  "okx_api_secret": "4F4B909E7BE28C53F03FEEDFF924B67E",
-  "okx_passphrase": "Cosmos1&&",
+  "okx_api_key": "",
+  "okx_api_secret": "",
+  "okx_passphrase": "",
+  "okx_demo_api_key": "",
+  "okx_demo_api_secret": "",
+  "okx_demo_api_passphrase": "",
   "use_testnet": false,
   "symbol": "ETH-USDT-SWAP",
   "short_safety_line_price": 2980.15,

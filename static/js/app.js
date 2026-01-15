@@ -376,6 +376,9 @@ function loadConfigToModal() {
     document.getElementById('okxApiKey').value = currentConfig.okx_api_key;
     document.getElementById('okxApiSecret').value = currentConfig.okx_api_secret;
     document.getElementById('okxPassphrase').value = currentConfig.okx_passphrase;
+    document.getElementById('okxDemoApiKey').value = currentConfig.okx_demo_api_key;
+    document.getElementById('okxDemoApiSecret').value = currentConfig.okx_demo_api_secret;
+    document.getElementById('okxDemoApiPassphrase').value = currentConfig.okx_demo_api_passphrase;
     document.getElementById('useTestnet').checked = currentConfig.use_testnet;
     document.getElementById('symbol').value = currentConfig.symbol;
     document.getElementById('shortSafetyLinePrice').value = currentConfig.short_safety_line_price;
@@ -411,6 +414,9 @@ async function saveConfig() {
         okx_api_key: document.getElementById('okxApiKey').value,
         okx_api_secret: document.getElementById('okxApiSecret').value,
         okx_passphrase: document.getElementById('okxPassphrase').value,
+        okx_demo_api_key: document.getElementById('okxDemoApiKey').value,
+        okx_demo_api_secret: document.getElementById('okxDemoApiSecret').value,
+        okx_demo_api_passphrase: document.getElementById('okxDemoApiPassphrase').value,
         use_testnet: document.getElementById('useTestnet').checked,
         symbol: document.getElementById('symbol').value,
         short_safety_line_price: parseFloat(document.getElementById('shortSafetyLinePrice').value),
