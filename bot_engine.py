@@ -279,16 +279,16 @@ def fetch_product_info(target_symbol, log_callback):
         log_callback(f"Exception in fetch_product_info: {e}", level="error")
         return False
 
-def okx_set_leverage(symbol, leverage_val, log_callback):
+def okx_set_leverage(symbol, leverage_val, mgn_mode, log_callback):
     try:
         path = "/api/v5/account/set-leverage"
         body = {
             "instId": symbol,
             "lever": str(int(leverage_val)),
-            "mgnMode": "cross"
+            "mgnMode": mgn_mode
         }
 
-        log_callback(f"Setting leverage to {leverage_val}x for {symbol}", level="info")
+        log_callback(f"Setting leverage to {leverage_val}x for {symbol} with mode {mgn_mode}", level="info")
         response = okx_request("POST", path, body_dict=body, log_callback=log_callback)
 
         if response and response.get('code') == '0':
@@ -337,12 +337,15 @@ class TradingBotEngine:
 
         # Initialize OKX API credentials globally
         global okx_api_key, okx_api_secret, okx_passphrase, okx_simulated_trading_header
-        okx_api_key = self.config['okx_api_key']
-        okx_api_secret = self.config['okx_api_secret']
-        okx_passphrase = self.config['okx_passphrase']
         if self.config['use_testnet']:
+            okx_api_key = self.config['okx_demo_api_key']
+            okx_api_secret = self.config['okx_demo_api_secret']
+            okx_passphrase = self.config['okx_demo_api_passphrase']
             okx_simulated_trading_header = {'x-simulated-trading': '1'}
         else:
+            okx_api_key = self.config['okx_api_key']
+            okx_api_secret = self.config['okx_api_secret']
+            okx_passphrase = self.config['okx_passphrase']
             okx_simulated_trading_header = {}
 
         self.ws = None
@@ -436,7 +439,7 @@ class TradingBotEngine:
             self.emit('bot_status', {'running': False})
             return
  
-        if not okx_set_leverage(self.config['symbol'], self.config['leverage'], self.log):
+        if not okx_set_leverage(self.config['symbol'], self.config['leverage'], self.config['mode'], self.log):
             self.log("Failed to set leverage. Exiting.", 'error')
             self.is_running = False
             self.emit('bot_status', {'running': False})
@@ -472,6 +475,26 @@ class TradingBotEngine:
                 config.setdefault('cancel_on_tp_price_below_market', True)
                 config.setdefault('cancel_on_entry_price_below_market', True)
                 config.setdefault('websocket_timeframes', ['1m', '5m']) # Add default for websocket_timeframes
+                config.setdefault('direction', 'long')
+                config.setdefault('mode', 'isolated')
+                config.setdefault('tp_amount', 0.5)
+                config.setdefault('sl_amount', 1.0)
+                config.setdefault('trigger_price', 'last')
+                config.setdefault('tp_mode', 'limit')
+                config.setdefault('tp_type', 'oco')
+                config.setdefault('okx_demo_api_key', '')
+                config.setdefault('okx_demo_api_secret', '')
+                config.setdefault('okx_demo_api_passphrase', '')
+                config.setdefault('use_chg_open_close', False)
+                config.setdefault('min_chg_open_close', 0)
+                config.setdefault('max_chg_open_close', 0)
+                config.setdefault('use_chg_high_low', False)
+                config.setdefault('min_chg_high_low', 0)
+                config.setdefault('max_chg_high_low', 0)
+                config.setdefault('use_chg_high_close', False)
+                config.setdefault('min_chg_high_close', 0)
+                config.setdefault('max_chg_high_close', 0)
+                config.setdefault('candlestick_timeframe', '1m')
                 return config
         except FileNotFoundError:
             self.log(f"Config file not found: {self.config_path}", 'error')
@@ -952,7 +975,7 @@ class TradingBotEngine:
 
     def _okx_place_order(self, symbol, side, qty, price=None, order_type="Market",
                         time_in_force=None, reduce_only=False,
-                        stop_loss_price=None, take_profit_price=None):
+                        stop_loss_price=None, take_profit_price=None, posSide=None):
         try:
             path = "/api/v5/trade/order"
             price_precision = PRODUCT_INFO.get('pricePrecision', 4)
@@ -962,11 +985,14 @@ class TradingBotEngine:
 
             body = {
                 "instId": symbol,
-                "tdMode": "cross",
+                "tdMode": self.config.get('mode', 'cross'),
                 "side": side.lower(),
                 "ordType": order_type.lower(),
                 "sz": order_qty_str,
             }
+
+            if self.config.get('hedge_mode', False) and posSide:
+                body["posSide"] = posSide
 
             if order_type.lower() == "limit" and price is not None:
                 body["px"] = f"{price:.{price_precision}f}"
@@ -1430,10 +1456,10 @@ class TradingBotEngine:
 
             reduced_tp = self.entry_reduced_tp_flag if hasattr(self, 'entry_reduced_tp_flag') else False
 
-            tp_price_offset = self.config['tp_price_offset']
-            sl_price_offset = self.config['sl_price_offset']
+            tp_price_offset = self.config.get('tp_price_offset', 0.6)
+            sl_price_offset = self.config.get('sl_price_offset', 30)
 
-            # Assuming long position for now based on strategy (Entry Price Offset +1.0, TP -0.6, SL +30)
+            # Assuming long position for now based on strategy
             signal_direction = self.pending_entry_order_details.get('signal')
 
             if signal_direction == 1: # Long position
@@ -1464,11 +1490,11 @@ class TradingBotEngine:
             # Place TP and SL as algo (conditional) orders via /api/v5/trade/order-algo
             tp_body = {
                 "instId": self.config['symbol'],
-                "tdMode": "cross",
+                "tdMode": self.config.get('mode', 'cross'),
                 "side": "sell",
                 "posSide": "long",
                 "ordType": "conditional",
-                "sz": f"{actual_qty:.{qty_precision}f}",
+                "sz": f"{(actual_qty * (self.config.get('tp_amount', 100) / 100)):.{qty_precision}f}",
                 "tpTriggerPx": f"{tp_price:.{price_precision}f}",
                 "tpOrdPx": "market",
                 "reduceOnly": "true"
@@ -1486,11 +1512,11 @@ class TradingBotEngine:
 
             sl_body = {
                 "instId": self.config['symbol'],
-                "tdMode": "cross",
+                "tdMode": self.config.get('mode', 'cross'),
                 "side": "sell",
                 "posSide": "long",
                 "ordType": "conditional",
-                "sz": f"{actual_qty:.{qty_precision}f}",
+                "sz": f"{(actual_qty * (self.config.get('sl_amount', 100) / 100)):.{qty_precision}f}",
                 "slTriggerPx": f"{sl_price:.{price_precision}f}",
                 "slOrdPx": "market",
                 "reduceOnly": "true"
@@ -1653,6 +1679,52 @@ class TradingBotEngine:
             self.log(f"Exception in _get_latest_data_and_indicators: {e}", level="error")
             return None
 
+    def _check_candlestick_conditions(self, market_data):
+        # Fetch the latest completed candle for the primary timeframe (e.g., '1m')
+        # This assumes you have historical data being updated.
+        timeframe = self.config.get('candlestick_timeframe', '1m')
+        with self.data_lock:
+            df = self.historical_data_store.get(timeframe)
+            if df is None or df.empty:
+                self.log(f"No historical data for {timeframe} to check candlestick conditions.", "warning")
+                return True # Default to true if data is not available to not block trades
+
+            latest_candle = df.iloc[-1]
+            o = latest_candle['Open']
+            h = latest_candle['High']
+            l = latest_candle['Low']
+            c = latest_candle['Close']
+
+        # Check Open-Close Change
+        if self.config.get('use_chg_open_close'):
+            chg_open_close = abs(o - c)
+            min_chg = self.config.get('min_chg_open_close', 0)
+            max_chg = self.config.get('max_chg_open_close', 0)
+            if not (min_chg <= chg_open_close <= max_chg):
+                self.log(f"Candlestick Fail: Open-Close change ({chg_open_close:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        # Check High-Low Change
+        if self.config.get('use_chg_high_low'):
+            chg_high_low = h - l
+            min_chg = self.config.get('min_chg_high_low', 0)
+            max_chg = self.config.get('max_chg_high_low', 0)
+            if not (min_chg <= chg_high_low <= max_chg):
+                self.log(f"Candlestick Fail: High-Low change ({chg_high_low:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        # Check High-Close Change
+        if self.config.get('use_chg_high_close'):
+            chg_high_close = abs(h - c)
+            min_chg = self.config.get('min_chg_high_close', 0)
+            max_chg = self.config.get('max_chg_high_close', 0)
+            if not (min_chg <= chg_high_close <= max_chg):
+                self.log(f"Candlestick Fail: High-Close change ({chg_high_close:.2f}) out of range ({min_chg}-{max_chg}).", "info")
+                return False
+
+        self.log("Candlestick conditions PASSED.", "info")
+        return True
+
     def _check_entry_conditions(self, market_data):
         with self.position_lock:
             if self.in_position:
@@ -1664,9 +1736,10 @@ class TradingBotEngine:
 
         current_price = market_data['current_price']
         
-        # Determine entry side based on safety lines
-        long_condition = current_price > self.config['long_safety_line_price']
-        short_condition = current_price < self.config['short_safety_line_price']
+        # Determine entry side based on safety lines and direction config
+        direction = self.config.get('direction', 'long')
+        long_condition = current_price > self.config['long_safety_line_price'] and direction == 'long'
+        short_condition = current_price < self.config['short_safety_line_price'] and direction == 'short'
 
         signal = 0
         if long_condition:
@@ -1675,7 +1748,11 @@ class TradingBotEngine:
             signal = -1 # SELL
         
         if signal == 0:
-            self.log(f"No entry signal: Current price {current_price:.2f} not past safety lines.", level="info")
+            self.log(f"No entry signal: Current price {current_price:.2f} not past safety lines for {direction} direction.", level="info")
+            return False, 0.0, None
+
+        # Check candlestick conditions if safety line condition is met
+        if not self._check_candlestick_conditions(market_data):
             return False, 0.0, None
 
         entry_price_offset = self.config['entry_price_offset']
@@ -1920,6 +1997,12 @@ class TradingBotEngine:
             if not self.ws_subscriptions_ready.wait(timeout=20): # Longer timeout for subscriptions
                 self.log("WebSocket subscriptions not ready within timeout. Exiting.", level="error")
                 return
+
+            # Fetch historical data for the selected timeframe
+            timeframe = self.config.get('candlestick_timeframe', '1m')
+            end_date = datetime.now(timezone.utc)
+            start_date = end_date - timedelta(days=2) # Fetch 2 days of data
+            self._fetch_initial_historical_data(self.config['symbol'], timeframe, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
 
             # Initial account information is no longer updated in real-time via private WebSocket.
             # The bot will not track account balance or available equity in real-time.

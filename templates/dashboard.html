@@ -21,11 +21,8 @@
                         <i class="bi bi-moon-stars" id="themeIcon"></i>
                     </label>
                 </div>
-                <button class="btn btn-success" id="startBtn">
-                    <i class="bi bi-play-fill"></i> Start
-                </button>
-                <button class="btn btn-danger" id="stopBtn" disabled>
-                    <i class="bi bi-stop-fill"></i> Stop
+                <button class="btn btn-primary" id="startStopBtn">
+                    <i class="bi bi-play-fill"></i> <span>Start</span>
                 </button>
                 <button class="btn btn-secondary" id="configBtn">
                     <i class="bi bi-gear-fill"></i> Config
@@ -77,14 +74,14 @@
                             <div class="card-header"><h5 class="mb-0"><i class="bi bi-cash-stack"></i> Financials</h5></div>
                             <div class="card-body">
                                 <div class="row g-3">
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Capital</div><div class="stat-value" id="totalCapital">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Max Allowed Used</div><div class="stat-value" id="maxAllowedUsedDisplay">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Max Amount</div><div class="stat-value" id="maxAmountDisplay">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Used Amount</div><div class="stat-value" id="usedAmount">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Remaining Amount</div><div class="stat-value" id="remainingAmount">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value" id="balance">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">$0.00</div></div></div>
-                                    <div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="totalTrades">0</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Total Capital</div><div class="stat-value" id="totalCapital">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Max Allowed Used</div><div class="stat-value" id="maxAllowedUsedDisplay">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Max Amount</div><div class="stat-value" id="maxAmountDisplay">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Used Amount</div><div class="stat-value" id="usedAmount">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Remaining Amount</div><div class="stat-value" id="remainingAmount">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value" id="balance">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">$0.00</div></div></div>
+                                    <div class="col-lg-2 col-md-4 col-sm-6"><div class="stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="totalTrades">0</div></div></div>
                                 </div>
                             </div>
                         </div>
@@ -169,20 +166,33 @@
                             <div id="generalSettings" class="accordion-collapse collapse show" data-bs-parent="#configAccordion">
                                 <div class="accordion-body">
                                     <div class="mb-3">
-                                        <label class="form-label">OKX API Key</label>
+                                        <label class="form-label">OKX Live API Key</label>
                                         <input type="text" class="form-control" id="okxApiKey">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">OKX API Secret</label>
+                                        <label class="form-label">OKX Live API Secret</label>
                                         <input type="password" class="form-control" id="okxApiSecret">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">OKX Passphrase</label>
+                                        <label class="form-label">OKX Live Passphrase</label>
                                         <input type="password" class="form-control" id="okxPassphrase">
+                                    </div>
+                                    <hr>
+                                    <div class="mb-3">
+                                        <label class="form-label">OKX Demo API Key</label>
+                                        <input type="text" class="form-control" id="okxDemoApiKey">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">OKX Demo API Secret</label>
+                                        <input type="password" class="form-control" id="okxDemoApiSecret">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">OKX Demo API Passphrase</label>
+                                        <input type="password" class="form-control" id="okxDemoApiPassphrase">
                                     </div>
                                     <div class="mb-3 form-check">
                                         <input type="checkbox" class="form-check-input" id="useTestnet">
-                                        <label class="form-check-label" for="useTestnet">Use Testnet</label>
+                                        <label class="form-check-label" for="useTestnet">Use Demo API</label>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Symbol</label>
@@ -245,20 +255,122 @@
                                         <input type="number" class="form-control" id="batchSizePerLoop" min="1">
                                     </div>
                                     <div class="mb-3">
+                                        <label class="form-label">Direction</label>
+                                        <select class="form-select" id="direction">
+                                            <option value="short">Short</option>
+                                            <option value="long">Long</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Mode</label>
+                                        <select class="form-select" id="mode">
+                                            <option value="cross">Cross</option>
+                                            <option value="isolated">Isolated</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label">Target Order Amount</label>
                                         <input type="number" class="form-control" id="targetOrderAmount" step="0.001" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">TP Close Amount (%)</label>
+                                        <input type="number" class="form-control" id="tpAmount" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">SL Close Amount (%)</label>
+                                        <input type="number" class="form-control" id="slAmount" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Trigger Price</label>
+                                        <select class="form-select" id="triggerPrice">
+                                            <option value="last">Last</option>
+                                            <option value="market">Market</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">TP Mode</label>
+                                        <select class="form-select" id="tpMode">
+                                            <option value="limit">TP Limit</option>
+                                            <option value="market">TP Market</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">TP Type</label>
+                                        <select class="form-select" id="tpType">
+                                            <option value="oco">OCO TP/SL</option>
+                                            <option value="split">Split TP/SL</option>
+                                        </select>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Min Order Amount</label>
                                         <input type="number" class="form-control" id="minOrderAmount" step="0.001">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Target Order Amount</label>
-                                        <input type="number" class="form-control" id="targetOrderAmount" step="0.001" min="0">
-                                    </div>
-                                    <div class="mb-3">
                                         <label class="form-label">Cancel Unfilled Order (seconds)</label>
                                         <input type="number" class="form-control" id="cancelUnfilledSeconds" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#candlestickConditions">
+                                    Candlestick Entry Conditions
+                                </button>
+                            </h2>
+                            <div id="candlestickConditions" class="accordion-collapse collapse" data-bs-parent="#configAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Timeframe</label>
+                                        <select class="form-select" id="candlestickTimeframe">
+                                            <option value="1m">1 Minute</option>
+                                            <option value="3m">3 Minutes</option>
+                                            <option value="5m">5 Minutes</option>
+                                            <option value="15m">15 Minutes</option>
+                                            <option value="30m">30 Minutes</option>
+                                            <option value="1h">1 Hour</option>
+                                            <option value="4h">4 Hours</option>
+                                            <option value="1d">1 Day</option>
+                                        </select>
+                                    </div>
+                                    <!-- Chg between Open and Close -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgOpenClose">
+                                            <label class="form-check-label" for="useChgOpenClose">Chg between Open and Close</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgOpenClose" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgOpenClose" step="0.01">
+                                        </div>
+                                    </div>
+                                    <!-- Chg between High and Low -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgHighLow">
+                                            <label class="form-check-label" for="useChgHighLow">Chg between High and Low</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgHighLow" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgHighLow" step="0.01">
+                                        </div>
+                                    </div>
+                                    <!-- Chg between High and Close -->
+                                    <div class="mb-3">
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useChgHighClose">
+                                            <label class="form-check-label" for="useChgHighClose">Chg between High and Close</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Min Chg</span>
+                                            <input type="number" class="form-control" id="minChgHighClose" step="0.01">
+                                            <span class="input-group-text">Max Chg</span>
+                                            <input type="number" class="form-control" id="maxChgHighClose" step="0.01">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

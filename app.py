@@ -49,21 +49,33 @@ def get_config():
 @app.route('/api/config', methods=['POST'])
 def update_config():
     global bot_engine
-    
+
     try:
         new_config = request.json
-        if 'active_strategy' in new_config:
-            del new_config['active_strategy']
-        if 'target_order_amount' in new_config: # Remove old parameter if present
-            del new_config['target_order_amount']
-        
+
+        # Whitelist of all valid parameters
+        allowed_params = [
+            'okx_api_key', 'okx_api_secret', 'okx_passphrase', 'okx_demo_api_key', 'okx_demo_api_secret', 'okx_demo_api_passphrase', 'use_testnet', 'symbol',
+            'short_safety_line_price', 'long_safety_line_price', 'leverage', 'max_allowed_used',
+            'entry_price_offset', 'batch_offset', 'tp_price_offset', 'sl_price_offset',
+            'loop_time_seconds', 'rate_divisor', 'batch_size_per_loop', 'min_order_amount',
+            'target_order_amount', 'cancel_unfilled_seconds', 'cancel_on_tp_price_below_market',
+            'cancel_on_entry_price_below_market', 'direction', 'mode', 'tp_amount', 'sl_amount',
+            'trigger_price', 'tp_mode', 'tp_type', 'use_chg_open_close', 'min_chg_open_close',
+            'max_chg_open_close', 'use_chg_high_low', 'min_chg_high_low', 'max_chg_high_low',
+            'use_chg_high_close', 'min_chg_high_close', 'max_chg_high_close', 'candlestick_timeframe'
+        ]
+
+        # Filter the new_config to only include allowed parameters
+        filtered_config = {k: v for k, v in new_config.items() if k in allowed_params}
+
         if bot_engine and bot_engine.is_running:
             return jsonify({'success': False, 'message': 'Please stop the bot before updating configuration'}), 400
-        
-        save_config(new_config)
-        
+
+        save_config(filtered_config)
+
         return jsonify({'success': True, 'message': 'Configuration updated successfully'})
-    
+
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
@@ -80,7 +92,7 @@ def get_status():
             'current_take_profit': 0.0,
             'current_stop_loss': 0.0
         })
-    
+
     return jsonify({
         'running': bot_engine.is_running,
         'balance': bot_engine.current_balance,
@@ -96,7 +108,7 @@ def get_status():
 def handle_connect(sid): # Add sid argument
     logging.info(f'Client connected: {sid}')
     emit('connection_status', {'connected': True}, room=sid) # Emit to specific client
-    
+
     if bot_engine:
         emit('bot_status', {'running': bot_engine.is_running}, room=sid)
         emit('balance_update', {'balance': bot_engine.current_balance}, room=sid)
@@ -110,7 +122,7 @@ def handle_connect(sid): # Add sid argument
             'current_take_profit': bot_engine.current_take_profit,
             'current_stop_loss': bot_engine.current_stop_loss
         }, room=sid)
-        
+
         for log in list(bot_engine.console_logs):
             emit('console_log', log, room=sid)
 
@@ -119,21 +131,21 @@ def handle_disconnect():
     logging.info('Client disconnected')
 
 @socketio.on('start_bot')
-def handle_start_bot():
+def handle_start_bot(data=None):
     global bot_engine
     print("--- DEBUG: handle_start_bot called ---", flush=True)
-    
+
     try:
         config = load_config() # This is line 111
-        
+
         if bot_engine and bot_engine.is_running:
             emit('error', {'message': 'Bot is already running'})
             return
-        
+
         try:
             bot_engine = TradingBotEngine(config_file, emit_to_client) # Pass config_file
             bot_engine.start()
-            
+
             # The bot_engine itself will emit status and success messages
         except Exception as e:
             logging.error(f'Error during bot_engine instantiation or start: {str(e)}', exc_info=True)
@@ -143,30 +155,30 @@ def handle_start_bot():
         emit('error', {'message': f'Failed to start bot due to config error: {str(e)}'})
 
 @socketio.on('stop_bot')
-def handle_stop_bot():
+def handle_stop_bot(data=None):
     global bot_engine
-    
+
     try:
         if not bot_engine or not bot_engine.is_running:
             emit('error', {'message': 'Bot is not running'})
             return
-        
+
         bot_engine.stop()
-        
+
         # The bot_engine itself will emit status and success messages
-    
+
     except Exception as e:
         logging.error(f'Error stopping bot: {str(e)}')
         emit('error', {'message': f'Failed to stop bot: {str(e)}'})
 
 @socketio.on('clear_console')
-def handle_clear_console():
+def handle_clear_console(data=None):
     if bot_engine:
         bot_engine.console_logs.clear()
     emit('console_cleared', {})
 
 @socketio.on('batch_modify_tpsl')
-def handle_batch_modify_tpsl():
+def handle_batch_modify_tpsl(data=None):
     global bot_engine
     if bot_engine:
         bot_engine.batch_modify_tpsl()
@@ -174,7 +186,7 @@ def handle_batch_modify_tpsl():
         emit('error', {'message': 'Bot is not running.'})
 
 @socketio.on('batch_cancel_orders')
-def handle_batch_cancel_orders():
+def handle_batch_cancel_orders(data=None):
     global bot_engine
     if bot_engine:
         bot_engine.batch_cancel_orders()
@@ -184,4 +196,3 @@ def handle_batch_cancel_orders():
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False, log_output=True, allow_unsafe_werkzeug=True)
-

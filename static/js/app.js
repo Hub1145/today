@@ -31,14 +31,15 @@ function setupEventListeners() {
         updateThemeIcon(theme);
     });
 
-    document.getElementById('startBtn').addEventListener('click', () => {
-        socket.emit('start_bot');
-        document.getElementById('startBtn').disabled = true;
-    });
+    document.getElementById('startStopBtn').addEventListener('click', () => {
+        const btn = document.getElementById('startStopBtn');
+        btn.disabled = true; // Disable button to prevent double clicks
 
-    document.getElementById('stopBtn').addEventListener('click', () => {
-        socket.emit('stop_bot');
-        document.getElementById('stopBtn').disabled = true;
+        if (isBotRunning) {
+            socket.emit('stop_bot');
+        } else {
+            socket.emit('start_bot');
+        }
     });
 
     document.getElementById('configBtn').addEventListener('click', () => {
@@ -129,21 +130,26 @@ function setupSocketListeners() {
 }
 
 function updateBotStatus(running) {
+    isBotRunning = running;
     const statusBadge = document.getElementById('botStatus');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const btnIcon = startStopBtn.querySelector('i');
+    const btnText = startStopBtn.querySelector('span');
 
     if (running) {
         statusBadge.textContent = 'Running';
         statusBadge.className = 'badge status-badge running';
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
+        startStopBtn.className = 'btn btn-danger';
+        btnIcon.className = 'bi bi-stop-fill';
+        btnText.textContent = 'Stop';
     } else {
         statusBadge.textContent = 'Stopped';
         statusBadge.className = 'badge status-badge stopped';
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
+        startStopBtn.className = 'btn btn-success';
+        btnIcon.className = 'bi bi-play-fill';
+        btnText.textContent = 'Start';
     }
+    startStopBtn.disabled = false; // Re-enable the button
 }
 
 
@@ -189,6 +195,14 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.symbol}</span>
             </div>
             <div class="param-item">
+                <span class="param-label">Direction:</span>
+                <span class="param-value">${currentConfig.direction}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Mode:</span>
+                <span class="param-value">${currentConfig.mode}</span>
+            </div>
+            <div class="param-item">
                 <span class="param-label">Leverage:</span>
                 <span class="param-value">${currentConfig.leverage}x</span>
             </div>
@@ -201,24 +215,40 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.long_safety_line_price}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Max Allowed Used:</span>
-                <span class="param-value">${currentConfig.max_allowed_used}</span>
+                <span class="param-label">Target Order Amount:</span>
+                <span class="param-value">${currentConfig.target_order_amount}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Entry Price Offset:</span>
                 <span class="param-value">${currentConfig.entry_price_offset}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Batch Offset:</span>
-                <span class="param-value">${currentConfig.batch_offset}</span>
-            </div>
-            <div class="param-item">
                 <span class="param-label">TP Price Offset:</span>
                 <span class="param-value">${currentConfig.tp_price_offset}</span>
             </div>
             <div class="param-item">
+                <span class="param-label">TP Amount:</span>
+                <span class="param-value">${currentConfig.tp_amount}</span>
+            </div>
+            <div class="param-item">
                 <span class="param-label">SL Price Offset:</span>
                 <span class="param-value">${currentConfig.sl_price_offset}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">SL Amount:</span>
+                <span class="param-value">${currentConfig.sl_amount}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Trigger Price:</span>
+                <span class="param-value">${currentConfig.trigger_price}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">TP Mode:</span>
+                <span class="param-value">${currentConfig.tp_mode}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">TP Type:</span>
+                <span class="param-value">${currentConfig.tp_type}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Loop Time:</span>
@@ -233,12 +263,12 @@ function updateParametersDisplay() {
                 <span class="param-value">${currentConfig.batch_size_per_loop}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Min Order Amount:</span>
-                <span class="param-value">${currentConfig.min_order_amount}</span>
+                <span class="param-label">Batch Offset:</span>
+                <span class="param-value">${currentConfig.batch_offset}</span>
             </div>
             <div class="param-item">
-                <span class="param-label">Target Order Amount:</span>
-                <span class="param-value">${currentConfig.target_order_amount}</span>
+                <span class="param-label">Min Order Amount:</span>
+                <span class="param-value">${currentConfig.min_order_amount}</span>
             </div>
             <div class="param-item">
                 <span class="param-label">Cancel Unfilled in:</span>
@@ -346,6 +376,9 @@ function loadConfigToModal() {
     document.getElementById('okxApiKey').value = currentConfig.okx_api_key;
     document.getElementById('okxApiSecret').value = currentConfig.okx_api_secret;
     document.getElementById('okxPassphrase').value = currentConfig.okx_passphrase;
+    document.getElementById('okxDemoApiKey').value = currentConfig.okx_demo_api_key;
+    document.getElementById('okxDemoApiSecret').value = currentConfig.okx_demo_api_secret;
+    document.getElementById('okxDemoApiPassphrase').value = currentConfig.okx_demo_api_passphrase;
     document.getElementById('useTestnet').checked = currentConfig.use_testnet;
     document.getElementById('symbol').value = currentConfig.symbol;
     document.getElementById('shortSafetyLinePrice').value = currentConfig.short_safety_line_price;
@@ -364,6 +397,27 @@ function loadConfigToModal() {
     document.getElementById('cancelUnfilledSeconds').value = currentConfig.cancel_unfilled_seconds;
     document.getElementById('cancelOnTpPriceBelowMarket').checked = currentConfig.cancel_on_tp_price_below_market;
     document.getElementById('cancelOnEntryPriceBelowMarket').checked = currentConfig.cancel_on_entry_price_below_market;
+
+    // New fields
+    document.getElementById('direction').value = currentConfig.direction;
+    document.getElementById('mode').value = currentConfig.mode;
+    document.getElementById('tpAmount').value = currentConfig.tp_amount;
+    document.getElementById('slAmount').value = currentConfig.sl_amount;
+    document.getElementById('triggerPrice').value = currentConfig.trigger_price;
+    document.getElementById('tpMode').value = currentConfig.tp_mode;
+    document.getElementById('tpType').value = currentConfig.tp_type;
+
+    // Candlestick conditions
+    document.getElementById('useChgOpenClose').checked = currentConfig.use_chg_open_close;
+    document.getElementById('minChgOpenClose').value = currentConfig.min_chg_open_close;
+    document.getElementById('maxChgOpenClose').value = currentConfig.max_chg_open_close;
+    document.getElementById('useChgHighLow').checked = currentConfig.use_chg_high_low;
+    document.getElementById('minChgHighLow').value = currentConfig.min_chg_high_low;
+    document.getElementById('maxChgHighLow').value = currentConfig.max_chg_high_low;
+    document.getElementById('useChgHighClose').checked = currentConfig.use_chg_high_close;
+    document.getElementById('minChgHighClose').value = currentConfig.min_chg_high_close;
+    document.getElementById('maxChgHighClose').value = currentConfig.max_chg_high_close;
+    document.getElementById('candlestickTimeframe').value = currentConfig.candlestick_timeframe;
 }
 
 async function saveConfig() {
@@ -371,6 +425,9 @@ async function saveConfig() {
         okx_api_key: document.getElementById('okxApiKey').value,
         okx_api_secret: document.getElementById('okxApiSecret').value,
         okx_passphrase: document.getElementById('okxPassphrase').value,
+        okx_demo_api_key: document.getElementById('okxDemoApiKey').value,
+        okx_demo_api_secret: document.getElementById('okxDemoApiSecret').value,
+        okx_demo_api_passphrase: document.getElementById('okxDemoApiPassphrase').value,
         use_testnet: document.getElementById('useTestnet').checked,
         symbol: document.getElementById('symbol').value,
         short_safety_line_price: parseFloat(document.getElementById('shortSafetyLinePrice').value),
@@ -389,6 +446,27 @@ async function saveConfig() {
         cancel_unfilled_seconds: parseInt(document.getElementById('cancelUnfilledSeconds').value),
         cancel_on_tp_price_below_market: document.getElementById('cancelOnTpPriceBelowMarket').checked,
         cancel_on_entry_price_below_market: document.getElementById('cancelOnEntryPriceBelowMarket').checked,
+
+        // New fields
+        direction: document.getElementById('direction').value,
+        mode: document.getElementById('mode').value,
+        tp_amount: parseFloat(document.getElementById('tpAmount').value),
+        sl_amount: parseFloat(document.getElementById('slAmount').value),
+        trigger_price: document.getElementById('triggerPrice').value,
+        tp_mode: document.getElementById('tpMode').value,
+        tp_type: document.getElementById('tpType').value,
+
+        // Candlestick conditions
+        use_chg_open_close: document.getElementById('useChgOpenClose').checked,
+        min_chg_open_close: parseFloat(document.getElementById('minChgOpenClose').value),
+        max_chg_open_close: parseFloat(document.getElementById('maxChgOpenClose').value),
+        use_chg_high_low: document.getElementById('useChgHighLow').checked,
+        min_chg_high_low: parseFloat(document.getElementById('minChgHighLow').value),
+        max_chg_high_low: parseFloat(document.getElementById('maxChgHighLow').value),
+        use_chg_high_close: document.getElementById('useChgHighClose').checked,
+        min_chg_high_close: parseFloat(document.getElementById('minChgHighClose').value),
+        max_chg_high_close: parseFloat(document.getElementById('maxChgHighClose').value),
+        candlestick_timeframe: document.getElementById('candlestickTimeframe').value,
     };
 
     try {
